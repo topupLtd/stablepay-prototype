@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StablePay Prototype v2</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0a1628;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+h1{color:#00d4aa;margin-bottom:10px}
+.sub{color:#8899aa;margin-bottom:30px;font-size:14px}
+.container{display:flex;gap:40px;flex-wrap:wrap;justify-content:center}
+.phone{width:375px;height:812px;background:#0a1628;border-radius:40px;border:4px solid #2a4a6a;overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.screen{display:none;width:100%;height:100%;flex-direction:column;padding:50px 20px 20px;position:relative}
+.screen.active{display:flex}
+.status{position:absolute;top:0;left:0;right:0;height:44px;display:flex;justify-content:center;align-items:center;font-size:14px;font-weight:600}
+.header{display:flex;align-items:center;margin-bottom:20px}
+.back{font-size:24px;cursor:pointer;padding:10px;margin-left:-10px}
+.back:hover{color:#00d4aa}
+.htitle{flex:1;text-align:center;font-size:18px;font-weight:600;margin-right:24px}
+.btn{background:linear-gradient(90deg,#00d4aa,#0088ff);color:#0a1628;border:none;padding:18px 32px;border-radius:30px;font-size:18px;font-weight:bold;cursor:pointer;width:100%;margin-top:auto}
+.btn:hover{transform:scale(1.02)}
+.btn2{background:transparent;color:#00d4aa;border:2px solid #00d4aa;padding:16px 32px;border-radius:30px;font-size:16px;font-weight:600;cursor:pointer;width:100%;margin-top:12px}
+.scroll{flex:1;overflow-y:auto;padding-bottom:80px}
+.bnav{position:absolute;bottom:0;left:0;right:0;height:70px;background:#0a1628;border-top:1px solid #2a4a6a;display:flex;justify-content:space-around;align-items:center;padding-bottom:10px}
+.nitem{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:8px 16px}
+.nitem:hover{transform:scale(1.1)}
+.nicon{font-size:20px}
+.nlabel{font-size:10px;color:#8899aa}
+.nitem.active .nicon,.nitem.active .nlabel{color:#00d4aa}
+.bcard{background:linear-gradient(135deg,#00d4aa,#0088ff);border-radius:20px;padding:24px;margin-bottom:20px;cursor:pointer}
+.qactions{display:flex;gap:12px;margin-bottom:24px}
+.abtn{flex:1;background:#152238;border-radius:16px;padding:20px 10px;text-align:center;cursor:pointer;border:none;color:#fff}
+.abtn:hover{background:#1e3a5f}
+.aicon{font-size:24px;margin-bottom:8px}
+.alabel{font-size:12px;color:#8899aa}
+.sechead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sectitle{font-size:16px;font-weight:600}
+.seclink{color:#00d4aa;font-size:14px;cursor:pointer}
+.txitem{background:#152238;border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer}
+.txitem:hover{background:#1e3a5f}
+.txicon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px}
+.txicon.rcv{background:#0a2a1a;color:#00d4aa}
+.txicon.snt{background:#2a1a1a;color:#ff6b6b}
+.txinfo{flex:1}
+.txname{font-size:14px;margin-bottom:4px}
+.txtime{font-size:11px;color:#8899aa}
+.txamt{font-size:14px;font-weight:600}
+.txamt.pos{color:#00d4aa}
+.txamt.neg{color:#ff6b6b}
+.optcard{background:#152238;border-radius:12px;padding:20px;display:flex;align-items:center;gap:16px;margin-bottom:12px;cursor:pointer;border:1px solid transparent}
+.optcard:hover{border-color:#00d4aa;background:#1e3a5f}
+.opticon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px}
+.opticon.bank{background:rgba(0,212,170,0.2)}
+.opticon.card{background:rgba(0,136,255,0.2)}
+.opticon.crypto{background:rgba(138,43,226,0.2)}
+.opticon.req{background:rgba(255,170,0,0.2)}
+.rcpcard{background:#152238;border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer}
+.rcpcard:hover{background:#1e3a5f}
+.rcpav{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold}
+.rcpav.bkash{background:#e2136e}
+.rcpav.nagad{background:#f26522}
+.rcpav.bank{background:#1a5f7a}
+.addrcp{background:#152238;border:2px dashed #00d4aa;border-radius:12px;padding:20px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;color:#00d4aa;font-size:16px;margin-bottom:20px}
+.addrcp:hover{background:#1e3a5f}
+.amtbox{background:#152238;border-radius:16px;padding:30px;text-align:center;margin-bottom:20px;border:2px solid #00d4aa}
+.amtval{font-size:48px;font-weight:bold}
+.qamts{display:flex;gap:10px;margin-bottom:20px}
+.qamt{flex:1;background:#152238;border:1px solid #2a4a6a;border-radius:20px;padding:12px;text-align:center;cursor:pointer;font-size:14px;color:#fff}
+.qamt.active{background:#00d4aa;color:#0a1628;border-color:#00d4aa}
+.sumcard{background:#152238;border-radius:12px;padding:20px;margin-bottom:20px}
+.sumrow{display:flex;justify-content:space-between;margin-bottom:12px;font-size:14px}
+.sumrow .lbl{color:#8899aa}
+.sumrow.total{border-top:1px solid #2a4a6a;padding-top:12px;margin-top:12px;font-weight:bold}
+.sumrow.total .val{color:#00d4aa;font-size:18px}
+.instbadge{background:#1e3a5f;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.succicon{width:120px;height:120px;background:linear-gradient(135deg,#00d4aa,#0088ff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:60px;margin:40px auto 30px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,170,0.4)}50%{box-shadow:0 0 0 20px rgba(0,212,170,0)}}
+.succtitle{font-size:24px;font-weight:bold;text-align:center;margin-bottom:10px}
+.succamt{font-size:42px;font-weight:bold;color:#00d4aa;text-align:center;margin-bottom:30px}
+.tabs{display:flex;background:#152238;border-radius:25px;padding:4px;margin-bottom:20px}
+.tab{flex:1;padding:12px;border-radius:22px;text-align:center;font-size:14px;cursor:pointer;color:#8899aa}
+.tab.active{background:#00d4aa;color:#0a1628;font-weight:600}
+.qrbox{background:#fff;border-radius:16px;padding:24px;text-align:center;margin-bottom:20px}
+.copyrow{background:#152238;border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;cursor:pointer}
+.copyrow:hover{background:#1e3a5f}
+.copybtn{background:#00d4aa;color:#0a1628;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:bold}
+.profitem{background:#152238;border-radius:10px;padding:16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.profitem:hover{background:#1e3a5f}
+.typecard{background:#152238;border:1px solid #2a4a6a;border-radius:16px;padding:24px;margin-bottom:16px;cursor:pointer}
+.typecard:hover{border-color:#00d4aa}
+.typecard.sel{border:2px solid #00d4aa}
+.chip{background:#152238;padding:8px 16px;border-radius:16px;font-size:12px;color:#8899aa;cursor:pointer}
+.chip.active{background:#00d4aa;color:#0a1628;font-weight:bold}
+.info{background:#1e3a5f;border-radius:12px;padding:16px;margin-top:20px}
+.info p{font-size:13px;color:#8899aa;line-height:1.5}
+.info strong{color:#00d4aa}
+.sidebar{background:#152238;border-radius:20px;padding:24px;width:320px;max-height:812px;overflow-y:auto}
+.flowtitle{font-size:18px;font-weight:bold;margin-bottom:20px;color:#00d4aa}
+.flowsec{margin-bottom:24px}
+.flowsectitle{font-size:12px;color:#8899aa;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.flowitem{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;cursor:pointer;margin-bottom:6px}
+.flowitem:hover{background:#1e3a5f}
+.flowitem.active{background:#00d4aa;color:#0a1628}
+.flownum{width:28px;height:28px;background:#2a4a6a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold}
+.flowitem.active .flownum{background:#0a1628;color:#00d4aa}
+.flowname{font-size:14px}
+
+.btn3{background:#152238;color:#fff;border:none;padding:16px 32px;border-radius:30px;font-size:16px;font-weight:600;cursor:pointer;width:100%;margin-top:12px}
+.input{background:#152238;border:1px solid #2a4a6a;border-radius:12px;padding:16px;margin-bottom:16px;width:100%;color:#fff;font-size:16px}
+.inputlbl{color:#8899aa;font-size:14px;margin-bottom:8px;display:block}
+.dots{display:flex;justify-content:center;gap:8px;margin:20px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:#2a4a6a}
+.dot.active{background:#00d4aa}
+.kycbanner{background:linear-gradient(135deg,#ff9900,#ff6600);border-radius:12px;padding:16px;margin-bottom:20px;cursor:pointer}
+.limitcard{background:#152238;border:1px solid #ff9900;border-radius:12px;padding:16px;margin-bottom:20px}
+.progress{height:8px;background:#2a4a6a;border-radius:4px;overflow:hidden;margin:12px 0}
+.progress-bar{height:100%;background:linear-gradient(90deg,#00d4aa,#0088ff);border-radius:4px}
+.doccard{background:#152238;border:2px dashed #2a4a6a;border-radius:16px;padding:40px 20px;text-align:center;margin-bottom:16px;cursor:pointer}
+.doccard:hover{border-color:#00d4aa;background:#1e3a5f}
+</style>
+</head>
+<body>
+<h1>StablePay Prototype v2</h1>
+<p class="sub">Click through screens • All buttons clickable • 27 screens • Onboarding + KYC</p>
+<div class="container">
+<div class="phone">
+
+<!-- Welcome -->
+<div class="screen active" id="s-welcome">
+<div class="status">9:41</div>
+<div style="width:100px;height:100px;background:linear-gradient(135deg,#00d4aa,#0088ff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:48px;margin:60px auto 30px;">$</div>
+<h1 style="font-size:32px;text-align:center;margin-bottom:10px;">StablePay</h1>
+<p style="color:#8899aa;text-align:center;margin-bottom:40px;">Freelancer's Digital Dollar Wallet</p>
+<div style="margin:20px 0;">
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:15px;"><div style="width:24px;height:24px;background:rgba(0,212,170,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#00d4aa;font-size:12px;">✓</div><span>Receive from Fiverr & Upwork</span></div>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:15px;"><div style="width:24px;height:24px;background:rgba(0,212,170,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#00d4aa;font-size:12px;">✓</div><span>Hold earnings in stable USD</span></div>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:15px;"><div style="width:24px;height:24px;background:rgba(0,212,170,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#00d4aa;font-size:12px;">✓</div><span>Cash out to bKash instantly</span></div>
+</div>
+<button class="btn" onclick="go('s-onboard1')">Get Started</button>
+<p style="color:#8899aa;text-align:center;margin-top:20px;font-size:14px;">Have account? <span style="color:#00d4aa;cursor:pointer;" onclick="go('s-login')">Log in</span></p>
+</div>
+<!-- Onboarding 1 -->
+<div class="screen" id="s-onboard1">
+<div class="status">9:41</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+<div style="width:200px;height:200px;background:#152238;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:80px;margin-bottom:40px;">🌍</div>
+<h2 style="font-size:24px;text-align:center;margin-bottom:16px;">Get Paid Globally</h2>
+<p style="color:#8899aa;text-align:center;padding:0 20px;">Receive from Fiverr, Upwork, and 50+ platforms directly to your US bank account</p>
+</div>
+<div class="dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+<button class="btn" onclick="go('s-onboard2')">Next</button>
+<p style="color:#8899aa;text-align:center;margin-top:16px;cursor:pointer;" onclick="go('s-signup')">Skip</p>
+</div>
+
+<!-- Onboarding 2 -->
+<div class="screen" id="s-onboard2">
+<div class="status">9:41</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+<div style="width:200px;height:200px;background:#152238;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:80px;margin-bottom:40px;">💵</div>
+<h2 style="font-size:24px;text-align:center;margin-bottom:16px;">Hold Stable USD</h2>
+<p style="color:#8899aa;text-align:center;padding:0 20px;">Your earnings stored as USDC - digital dollar always worth $1</p>
+</div>
+<div class="dots"><div class="dot"></div><div class="dot active"></div><div class="dot"></div></div>
+<button class="btn" onclick="go('s-onboard3')">Next</button>
+<p style="color:#8899aa;text-align:center;margin-top:16px;cursor:pointer;" onclick="go('s-signup')">Skip</p>
+</div>
+
+<!-- Onboarding 3 -->
+<div class="screen" id="s-onboard3">
+<div class="status">9:41</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+<div style="width:200px;height:200px;background:#152238;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:80px;margin-bottom:40px;">⚡</div>
+<h2 style="font-size:24px;text-align:center;margin-bottom:16px;">Instant Cash Out</h2>
+<p style="color:#8899aa;text-align:center;padding:0 20px;">Convert to BDT and send to bKash, Nagad, or bank in seconds</p>
+</div>
+<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot active"></div></div>
+<button class="btn" onclick="go('s-signup')">Create Account</button>
+<p style="color:#8899aa;text-align:center;margin-top:16px;cursor:pointer;" onclick="go('s-login')">Already have account?</p>
+</div>
+
+<!-- Sign Up -->
+<div class="screen" id="s-signup">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-welcome')">←</span><span class="htitle">Create Account</span></div>
+<div class="scroll">
+<p style="font-size:24px;font-weight:bold;margin-bottom:8px;">Enter your phone</p>
+<p style="color:#8899aa;font-size:14px;margin-bottom:24px;">We'll send a verification code</p>
+<label class="inputlbl">Phone Number</label>
+<div style="display:flex;gap:12px;margin-bottom:24px;">
+<div style="background:#152238;border:1px solid #2a4a6a;border-radius:12px;padding:16px;display:flex;align-items:center;gap:8px;"><span>🇧🇩</span><span>+880</span></div>
+<input type="tel" class="input" placeholder="1712-345-678" style="flex:1;margin-bottom:0;">
+</div>
+</div>
+<button class="btn" onclick="go('s-verify')">Send Code</button>
+</div>
+
+<!-- Verify OTP -->
+<div class="screen" id="s-verify">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-signup')">←</span><span class="htitle">Verify Phone</span></div>
+<div class="scroll">
+<p style="font-size:24px;font-weight:bold;margin-bottom:8px;">Enter code</p>
+<p style="color:#8899aa;font-size:14px;margin-bottom:24px;">Sent to +880 1712-345-678</p>
+<div style="display:flex;gap:12px;justify-content:center;margin-bottom:24px;">
+<div style="width:50px;height:60px;background:#152238;border:2px solid #00d4aa;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;">4</div>
+<div style="width:50px;height:60px;background:#152238;border:2px solid #00d4aa;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;">7</div>
+<div style="width:50px;height:60px;background:#152238;border:2px solid #00d4aa;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;">2</div>
+<div style="width:50px;height:60px;background:#152238;border:2px solid #00d4aa;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;">9</div>
+<div style="width:50px;height:60px;background:#152238;border:1px solid #2a4a6a;border-radius:12px;"></div>
+<div style="width:50px;height:60px;background:#152238;border:1px solid #2a4a6a;border-radius:12px;"></div>
+</div>
+<p style="color:#8899aa;text-align:center;">Didn't receive? <span style="color:#00d4aa;">Resend 0:45</span></p>
+</div>
+<button class="btn" onclick="go('s-setpin')">Verify</button>
+</div>
+
+<!-- Set PIN -->
+<div class="screen" id="s-setpin">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-verify')">←</span><span class="htitle">Set PIN</span></div>
+<div class="scroll">
+<p style="font-size:24px;font-weight:bold;margin-bottom:8px;">Create your PIN</p>
+<p style="color:#8899aa;font-size:14px;margin-bottom:24px;">You'll use this to access your wallet</p>
+<div style="display:flex;gap:16px;justify-content:center;margin-bottom:40px;">
+<div style="width:20px;height:20px;background:#00d4aa;border-radius:50%;"></div>
+<div style="width:20px;height:20px;background:#00d4aa;border-radius:50%;"></div>
+<div style="width:20px;height:20px;background:#00d4aa;border-radius:50%;"></div>
+<div style="width:20px;height:20px;background:#00d4aa;border-radius:50%;"></div>
+<div style="width:20px;height:20px;background:#2a4a6a;border-radius:50%;"></div>
+<div style="width:20px;height:20px;background:#2a4a6a;border-radius:50%;"></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:280px;margin:0 auto;">
+<div style="background:#152238;border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:24px;">1</div>
+<div style="background:#152238;border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:24px;">2</div>
+<div style="background:#152238;border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:24px;">3</div>
+<div style="background:#152238;border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:24px;">4</div>
+<div style="background:#152238;border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:24px;">5</div>
+<div style="background:#152238;border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:24px;">6</div>
+<div style="background:#152238;border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:24px;">7</div>
+<div style="background:#152238;border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:24px;">8</div>
+<div style="background:#152238;border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:24px;">9</div>
+<div></div>
+<div style="background:#152238;border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:24px;">0</div>
+<div style="background:#152238;border-radius:50%;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:20px;">⌫</div>
+</div>
+</div>
+<button class="btn" onclick="go('s-signupdone')">Continue</button>
+</div>
+
+<!-- Sign Up Done -->
+<div class="screen" id="s-signupdone">
+<div class="status">9:41</div>
+<div class="succicon">🎉</div>
+<h2 class="succtitle">Account Created!</h2>
+<p style="color:#8899aa;text-align:center;margin-bottom:30px;">Welcome to StablePay</p>
+<div style="background:#152238;border-radius:16px;padding:20px;margin-bottom:20px;">
+<p style="font-size:16px;font-weight:600;margin-bottom:16px;">What you can do now:</p>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><span style="color:#00d4aa;">✓</span><span>Receive money</span></div>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><span style="color:#00d4aa;">✓</span><span>Send to other users</span></div>
+<div style="display:flex;align-items:center;gap:12px;"><span style="color:#8899aa;">🔒</span><span style="color:#8899aa;">Cash out & card (needs KYC)</span></div>
+</div>
+<button class="btn" onclick="go('s-homenokyc')">Go to Wallet</button>
+<button class="btn3" onclick="go('s-kycstart')">Complete KYC Now</button>
+</div>
+
+<!-- Login -->
+<div class="screen" id="s-login">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-welcome')">←</span><span class="htitle">Log In</span></div>
+<div class="scroll">
+<p style="font-size:24px;font-weight:bold;margin-bottom:8px;">Welcome back</p>
+<p style="color:#8899aa;font-size:14px;margin-bottom:24px;">Enter your phone number</p>
+<label class="inputlbl">Phone Number</label>
+<div style="display:flex;gap:12px;margin-bottom:24px;">
+<div style="background:#152238;border:1px solid #2a4a6a;border-radius:12px;padding:16px;display:flex;align-items:center;gap:8px;"><span>🇧🇩</span><span>+880</span></div>
+<input type="tel" class="input" placeholder="1712-345-678" style="flex:1;margin-bottom:0;">
+</div>
+</div>
+<button class="btn" onclick="go('s-home')">Continue</button>
+<p style="color:#8899aa;text-align:center;margin-top:20px;">New? <span style="color:#00d4aa;cursor:pointer;" onclick="go('s-signup')">Create account</span></p>
+</div>
+
+<!-- Home WITHOUT KYC -->
+<div class="screen" id="s-homenokyc">
+<div class="status">9:41</div>
+<div style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;"><div><p style="color:#8899aa;font-size:14px;">Good morning</p><p style="font-size:22px;font-weight:bold;">Rahim Ahmed 👋</p></div><div style="width:40px;height:40px;background:#152238;border-radius:50%;display:flex;align-items:center;justify-content:center;">🔔</div></div>
+<div class="kycbanner" onclick="go('s-kycstart')"><div style="display:flex;align-items:center;gap:12px;"><div style="width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;">🔓</div><div style="flex:1;"><p style="font-weight:bold;color:#fff;">Complete Verification</p><p style="font-size:12px;color:rgba(255,255,255,0.8);">Unlock cash out & virtual card</p></div><span style="color:#fff;font-size:20px;">→</span></div></div>
+<div style="background:linear-gradient(135deg,#2a4a6a,#1e3a5f);border-radius:20px;padding:24px;margin-bottom:20px;">
+<p style="font-size:14px;color:#8899aa;margin-bottom:8px;">Your Balance</p>
+<div style="font-size:42px;font-weight:bold;display:flex;align-items:center;gap:10px;">$0.00<span style="background:rgba(255,255,255,0.1);padding:4px 12px;border-radius:12px;font-size:12px;">USDC</span></div>
+<div class="limitcard" style="margin-top:16px;margin-bottom:0;border-color:#ff9900;"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="color:#ff9900;font-size:12px;">⚠️ Limited</span><span style="font-size:12px;">$0 / $100</span></div><div class="progress"><div class="progress-bar" style="width:0%;"></div></div><p style="font-size:11px;color:#8899aa;">Complete KYC to unlock full features</p></div>
+</div>
+<div class="qactions">
+<button class="abtn" style="opacity:0.5;"><div class="aicon">↑</div><div class="alabel">Send</div></button>
+<button class="abtn" onclick="go('s-rcvusers')"><div class="aicon">↓</div><div class="alabel">Receive</div></button>
+<button class="abtn" style="opacity:0.5;"><div class="aicon">$</div><div class="alabel">Cash Out 🔒</div></button>
+</div>
+<div style="background:#152238;border-radius:12px;padding:20px;text-align:center;cursor:pointer;" onclick="go('s-kycstart')"><p style="font-size:40px;margin-bottom:12px;">💳</p><p style="font-weight:bold;">Virtual Card Locked</p><p style="color:#8899aa;font-size:12px;">Complete KYC to get card</p><button style="background:#ff9900;color:#fff;border:none;padding:10px 20px;border-radius:20px;margin-top:12px;font-weight:bold;">Verify Now</button></div>
+<div class="bnav"><div class="nitem active"><span class="nicon">🏠</span><span class="nlabel">Home</span></div><div class="nitem" style="opacity:0.5;"><span class="nicon">💳</span><span class="nlabel">Card</span></div><div class="nitem" onclick="go('s-activity')"><span class="nicon">📊</span><span class="nlabel">Activity</span></div><div class="nitem" onclick="go('s-profile')"><span class="nicon">👤</span><span class="nlabel">Profile</span></div></div>
+</div>
+
+<!-- KYC Start -->
+<div class="screen" id="s-kycstart">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-homenokyc')">←</span><span class="htitle">Verify Identity</span></div>
+<div class="scroll">
+<div style="text-align:center;margin-bottom:24px;"><div style="width:80px;height:80px;background:linear-gradient(135deg,#00d4aa,#0088ff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 16px;">🛡️</div><p style="font-size:20px;font-weight:bold;margin-bottom:8px;">Unlock Full Access</p><p style="color:#8899aa;font-size:14px;">Takes ~5 minutes</p></div>
+<p style="font-size:14px;font-weight:600;margin-bottom:12px;">What you'll unlock:</p>
+<div style="background:#0a2a1a;border-radius:12px;padding:16px;margin-bottom:20px;"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><span style="color:#00d4aa;">✓</span><span>Cash out to bKash, Nagad, Bank</span></div><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><span style="color:#00d4aa;">✓</span><span>Virtual Visa card</span></div><div style="display:flex;align-items:center;gap:12px;"><span style="color:#00d4aa;">✓</span><span>$10,000/month limit</span></div></div>
+<p style="font-size:14px;font-weight:600;margin-bottom:12px;">You'll need:</p>
+<div style="background:#152238;border-radius:12px;padding:16px;"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><span>🪪</span><span>NID or Passport</span></div><div style="display:flex;align-items:center;gap:12px;"><span>🤳</span><span>A selfie</span></div></div>
+</div>
+<button class="btn" onclick="go('s-kycinfo')">Start Verification</button>
+</div>
+
+<!-- KYC Info -->
+<div class="screen" id="s-kycinfo">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-kycstart')">←</span><span class="htitle">Personal Info</span></div>
+<div class="scroll">
+<div style="display:flex;gap:8px;margin-bottom:24px;"><div style="flex:1;height:4px;background:#00d4aa;border-radius:2px;"></div><div style="flex:1;height:4px;background:#2a4a6a;border-radius:2px;"></div><div style="flex:1;height:4px;background:#2a4a6a;border-radius:2px;"></div><div style="flex:1;height:4px;background:#2a4a6a;border-radius:2px;"></div></div>
+<p style="font-size:12px;color:#8899aa;margin-bottom:20px;">Step 1 of 4</p>
+<label class="inputlbl">Full Name</label><input type="text" class="input" value="Rahim Ahmed">
+<label class="inputlbl">Date of Birth</label><input type="text" class="input" value="15/03/1995">
+<label class="inputlbl">Address</label><input type="text" class="input" value="House 42, Road 5, Gulshan">
+<label class="inputlbl">City</label><input type="text" class="input" value="Dhaka">
+</div>
+<button class="btn" onclick="go('s-kycdoc')">Continue</button>
+</div>
+
+<!-- KYC Doc -->
+<div class="screen" id="s-kycdoc">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-kycinfo')">←</span><span class="htitle">ID Document</span></div>
+<div class="scroll">
+<div style="display:flex;gap:8px;margin-bottom:24px;"><div style="flex:1;height:4px;background:#00d4aa;border-radius:2px;"></div><div style="flex:1;height:4px;background:#00d4aa;border-radius:2px;"></div><div style="flex:1;height:4px;background:#2a4a6a;border-radius:2px;"></div><div style="flex:1;height:4px;background:#2a4a6a;border-radius:2px;"></div></div>
+<p style="font-size:12px;color:#8899aa;margin-bottom:20px;">Step 2 of 4</p>
+<p style="font-size:16px;font-weight:600;margin-bottom:16px;">Select document</p>
+<div style="display:flex;gap:12px;margin-bottom:24px;"><div style="flex:1;background:#152238;border:2px solid #00d4aa;border-radius:12px;padding:20px;text-align:center;"><p style="font-size:28px;margin-bottom:8px;">🪪</p><p style="font-weight:bold;">NID</p></div><div style="flex:1;background:#152238;border:1px solid #2a4a6a;border-radius:12px;padding:20px;text-align:center;"><p style="font-size:28px;margin-bottom:8px;">📘</p><p>Passport</p></div></div>
+<label class="inputlbl">NID Number</label><input type="text" class="input" value="1995123456789">
+<p style="font-size:16px;font-weight:600;margin:20px 0 16px;">Upload Photos</p>
+<div class="doccard"><p style="font-size:40px;margin-bottom:12px;">📷</p><p style="font-weight:bold;">Front Side</p><p style="color:#00d4aa;font-size:14px;">✓ Uploaded</p></div>
+<div class="doccard"><p style="font-size:40px;margin-bottom:12px;">📷</p><p style="font-weight:bold;">Back Side</p><p style="color:#8899aa;font-size:14px;">Tap to upload</p></div>
+</div>
+<button class="btn" onclick="go('s-kycselfie')">Continue</button>
+</div>
+
+<!-- KYC Selfie -->
+<div class="screen" id="s-kycselfie">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-kycdoc')">←</span><span class="htitle">Face Verification</span></div>
+<div class="scroll">
+<div style="display:flex;gap:8px;margin-bottom:24px;"><div style="flex:1;height:4px;background:#00d4aa;border-radius:2px;"></div><div style="flex:1;height:4px;background:#00d4aa;border-radius:2px;"></div><div style="flex:1;height:4px;background:#00d4aa;border-radius:2px;"></div><div style="flex:1;height:4px;background:#2a4a6a;border-radius:2px;"></div></div>
+<p style="font-size:12px;color:#8899aa;margin-bottom:20px;">Step 3 of 4</p>
+<div style="text-align:center;margin-bottom:24px;"><p style="font-size:16px;font-weight:600;">Take a selfie</p></div>
+<div style="width:220px;height:220px;background:#152238;border:3px dashed #00d4aa;border-radius:50%;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;"><div style="text-align:center;"><p style="font-size:60px;">🤳</p><p style="color:#8899aa;font-size:14px;">Position face</p></div></div>
+<div style="background:#152238;border-radius:12px;padding:16px;"><p style="font-size:14px;font-weight:600;margin-bottom:12px;">Tips:</p><div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;"><span style="color:#00d4aa;">✓</span><span style="font-size:13px;">Good lighting</span></div><div style="display:flex;align-items:center;gap:12px;"><span style="color:#00d4aa;">✓</span><span style="font-size:13px;">Remove glasses</span></div></div>
+</div>
+<button class="btn" onclick="go('s-kycreview')">Take Photo</button>
+</div>
+
+<!-- KYC Review -->
+<div class="screen" id="s-kycreview">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-kycselfie')">←</span><span class="htitle">Review & Submit</span></div>
+<div class="scroll">
+<div style="display:flex;gap:8px;margin-bottom:24px;"><div style="flex:1;height:4px;background:#00d4aa;border-radius:2px;"></div><div style="flex:1;height:4px;background:#00d4aa;border-radius:2px;"></div><div style="flex:1;height:4px;background:#00d4aa;border-radius:2px;"></div><div style="flex:1;height:4px;background:#00d4aa;border-radius:2px;"></div></div>
+<p style="font-size:12px;color:#8899aa;margin-bottom:20px;">Step 4 of 4</p>
+<div style="background:#152238;border-radius:12px;padding:16px;margin-bottom:16px;"><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span style="color:#8899aa;">Name</span><span>Rahim Ahmed</span></div><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span style="color:#8899aa;">DOB</span><span>15/03/1995</span></div><div style="display:flex;justify-content:space-between;"><span style="color:#8899aa;">NID</span><span>1995123456789</span></div></div>
+<div style="display:flex;gap:12px;margin-bottom:20px;"><div style="flex:1;background:#152238;border-radius:12px;padding:16px;text-align:center;"><p style="font-size:12px;color:#8899aa;margin-bottom:8px;">Front</p><div style="background:#1e3a5f;border-radius:8px;height:50px;display:flex;align-items:center;justify-content:center;color:#00d4aa;">✓</div></div><div style="flex:1;background:#152238;border-radius:12px;padding:16px;text-align:center;"><p style="font-size:12px;color:#8899aa;margin-bottom:8px;">Back</p><div style="background:#1e3a5f;border-radius:8px;height:50px;display:flex;align-items:center;justify-content:center;color:#00d4aa;">✓</div></div><div style="flex:1;background:#152238;border-radius:12px;padding:16px;text-align:center;"><p style="font-size:12px;color:#8899aa;margin-bottom:8px;">Selfie</p><div style="background:#1e3a5f;border-radius:8px;height:50px;display:flex;align-items:center;justify-content:center;color:#00d4aa;">✓</div></div></div>
+</div>
+<button class="btn" onclick="go('s-kycpending')">Submit</button>
+</div>
+
+<!-- KYC Pending -->
+<div class="screen" id="s-kycpending">
+<div class="status">9:41</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+<div style="width:120px;height:120px;background:#152238;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:60px;margin-bottom:30px;">⏳</div>
+<h2 style="font-size:24px;text-align:center;margin-bottom:12px;">Verifying...</h2>
+<p style="color:#8899aa;text-align:center;margin-bottom:30px;">Usually takes 5-10 minutes</p>
+<div style="background:#152238;border-radius:12px;padding:20px;width:100%;margin-bottom:20px;">
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><div style="width:32px;height:32px;background:#00d4aa;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#0a1628;">✓</div><div><p style="font-weight:bold;">Documents Received</p></div></div>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><div style="width:32px;height:32px;background:#0088ff;border-radius:50%;display:flex;align-items:center;justify-content:center;">⋯</div><div><p style="font-weight:bold;">Identity Check</p><p style="font-size:12px;color:#8899aa;">In progress...</p></div></div>
+<div style="display:flex;align-items:center;gap:12px;"><div style="width:32px;height:32px;background:#2a4a6a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#8899aa;">3</div><div><p style="color:#8899aa;">Approval</p></div></div>
+</div>
+</div>
+<button class="btn" onclick="go('s-kycdone')">Check Status</button>
+<button class="btn3" onclick="go('s-homenokyc')">Go to Wallet</button>
+</div>
+
+<!-- KYC Done -->
+<div class="screen" id="s-kycdone">
+<div class="status">9:41</div>
+<div class="succicon">✓</div>
+<h2 class="succtitle">Verified!</h2>
+<p style="color:#8899aa;text-align:center;margin-bottom:30px;">Identity verified successfully</p>
+<div style="background:#0a2a1a;border:1px solid #00d4aa;border-radius:16px;padding:20px;margin-bottom:20px;">
+<p style="font-size:16px;font-weight:600;margin-bottom:16px;color:#00d4aa;">🎉 Unlocked:</p>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><span style="color:#00d4aa;">✓</span><span>Cash out</span></div>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><span style="color:#00d4aa;">✓</span><span>Virtual Visa Card</span></div>
+<div style="display:flex;align-items:center;gap:12px;"><span style="color:#00d4aa;">✓</span><span>$10,000/month</span></div>
+</div>
+<button class="btn" onclick="go('s-home')">Go to Wallet</button>
+</div>
+
+
+
+<!-- Home -->
+<div class="screen" id="s-home">
+<div class="status">9:41</div>
+<div style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;"><div><p style="color:#8899aa;font-size:14px;">Good morning</p><p style="font-size:22px;font-weight:bold;">Rahim Ahmed 👋</p></div><div style="width:40px;height:40px;background:#152238;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="go('s-profile')">🔔</div></div>
+<div class="bcard" onclick="go('s-addmoney')">
+<p style="font-size:14px;color:rgba(0,0,0,0.5);margin-bottom:8px;">Your Balance</p>
+<div style="font-size:42px;font-weight:bold;color:#0a1628;display:flex;align-items:center;gap:10px;">$1,250<span style="background:rgba(0,0,0,0.2);padding:4px 12px;border-radius:12px;font-size:12px;">USDC</span></div>
+<p style="font-size:14px;color:rgba(0,0,0,0.5);margin-top:8px;">≈ ৳136,875 BDT</p>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;"><span style="background:rgba(0,0,0,0.2);padding:6px 12px;border-radius:12px;font-size:11px;color:#0a1628;">⭐ Stellar</span><button style="background:#0a1628;color:#fff;padding:8px 20px;border-radius:20px;font-size:14px;cursor:pointer;border:none;" onclick="event.stopPropagation();go('s-addmoney')">+ Add</button></div>
+</div>
+<div class="qactions">
+<button class="abtn" onclick="go('s-send')"><div class="aicon">↑</div><div class="alabel">Send</div></button>
+<button class="abtn" onclick="go('s-rcvusers')"><div class="aicon">↓</div><div class="alabel">Receive</div></button>
+<button class="abtn" onclick="go('s-cashout')"><div class="aicon">$</div><div class="alabel">Cash Out</div></button>
+</div>
+<div class="sechead"><span class="sectitle">Your Card</span><span class="seclink" onclick="go('s-card')">View →</span></div>
+<div class="txitem" onclick="go('s-card')"><span style="background:#1e3a5f;padding:8px 12px;border-radius:6px;font-size:12px;font-style:italic;font-weight:bold;">VISA</span><div class="txinfo"><p class="txname">•••• •••• •••• 4242</p><p class="txtime">Virtual Card • Active</p></div><span style="background:#0a2a1a;color:#00d4aa;padding:6px 12px;border-radius:12px;font-size:10px;">Active</span></div>
+<div class="sechead"><span class="sectitle">Recent</span><span class="seclink" onclick="go('s-activity')">See All</span></div>
+<div class="txitem" onclick="go('s-activity')"><div class="txicon rcv">↓</div><div class="txinfo"><p class="txname">Fiverr Deposit</p><p class="txtime">Today, 2:34 PM</p></div><span class="txamt pos">+$500</span></div>
+<div class="txitem" onclick="go('s-activity')"><div class="txicon snt">💳</div><div class="txinfo"><p class="txname">Amazon.com</p><p class="txtime">Today, 11:20 AM</p></div><span class="txamt neg">-$45.99</span></div>
+<div class="bnav"><div class="nitem active"><span class="nicon">🏠</span><span class="nlabel">Home</span></div><div class="nitem" onclick="go('s-card')"><span class="nicon">💳</span><span class="nlabel">Card</span></div><div class="nitem" onclick="go('s-activity')"><span class="nicon">📊</span><span class="nlabel">Activity</span></div><div class="nitem" onclick="go('s-profile')"><span class="nicon">👤</span><span class="nlabel">Profile</span></div></div>
+</div>
+
+<!-- Add Money -->
+<div class="screen" id="s-addmoney">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-home')">←</span><span class="htitle">Add Money</span></div>
+<div class="scroll">
+<div style="background:#152238;border-radius:12px;padding:16px;margin-bottom:20px;"><p style="color:#8899aa;font-size:14px;">Balance</p><p style="font-size:28px;font-weight:bold;">$1,250 <span style="font-size:14px;color:#8899aa;">USDC</span></p></div>
+<p style="font-size:16px;font-weight:600;margin-bottom:16px;">Choose method</p>
+<div class="optcard" onclick="go('s-rcvplat')"><div class="opticon bank">🏦</div><div style="flex:1;"><p style="font-size:16px;font-weight:600;">Bank Transfer</p><p style="font-size:12px;color:#8899aa;">Fiverr, Upwork</p></div><div><div style="background:#0a2a1a;color:#00d4aa;font-size:12px;padding:4px 10px;border-radius:10px;">FREE</div><p style="font-size:11px;color:#8899aa;text-align:right;">1-2 days</p></div></div>
+<div class="optcard" onclick="go('s-topup')"><div class="opticon card">💳</div><div style="flex:1;"><p style="font-size:16px;font-weight:600;">Card Top-up</p><p style="font-size:12px;color:#8899aa;">Visa, Mastercard</p></div><div><div style="background:#2a1a1a;color:#ff6b6b;font-size:12px;padding:4px 10px;border-radius:10px;">2.5%</div><p style="font-size:11px;color:#00d4aa;text-align:right;">Instant</p></div></div>
+<div class="optcard" onclick="go('s-usdc')"><div class="opticon crypto">🪙</div><div style="flex:1;"><p style="font-size:16px;font-weight:600;">USDC Deposit</p><p style="font-size:12px;color:#8899aa;">Stellar network</p></div><div><div style="background:#0a2a1a;color:#00d4aa;font-size:12px;padding:4px 10px;border-radius:10px;">FREE</div><p style="font-size:11px;color:#00d4aa;text-align:right;">~5 sec</p></div></div>
+<div class="optcard" onclick="go('s-rcvusers')"><div class="opticon req">👤</div><div style="flex:1;"><p style="font-size:16px;font-weight:600;">Request Payment</p><p style="font-size:12px;color:#8899aa;">QR or link</p></div><div><div style="background:#0a2a1a;color:#00d4aa;font-size:12px;padding:4px 10px;border-radius:10px;">FREE</div><p style="font-size:11px;color:#8899aa;text-align:right;">Varies</p></div></div>
+<div class="info"><p>💡 Funds held as <strong>USDC on Stellar</strong>. Secure & 1:1 for USD.</p></div>
+</div>
+</div>
+
+<!-- Receive Platforms -->
+<div class="screen" id="s-rcvplat">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-addmoney')">←</span><span class="htitle">Bank Details</span></div>
+<div class="scroll">
+<div class="tabs"><div class="tab active">From Platforms</div><div class="tab" onclick="go('s-rcvusers')">From Users</div></div>
+<div style="background:linear-gradient(135deg,#00d4aa,#0088ff);border-radius:16px;padding:20px;margin-bottom:20px;"><p style="font-size:12px;color:rgba(0,0,0,0.5);margin-bottom:12px;">YOUR USD ACCOUNT</p><p style="font-size:11px;color:rgba(0,0,0,0.5);">Account</p><p style="font-size:20px;font-weight:bold;color:#0a1628;margin-bottom:8px;">1234 5678 9012</p><p style="font-size:11px;color:rgba(0,0,0,0.5);">Routing: 021000021 • StablePay Bank</p></div>
+<div class="copyrow"><div><p style="font-size:12px;color:#8899aa;">Account</p><p>1234 5678 9012</p></div><span class="copybtn">Copy</span></div>
+<div class="copyrow"><div><p style="font-size:12px;color:#8899aa;">Routing</p><p>021000021</p></div><span class="copybtn">Copy</span></div>
+<p style="font-size:16px;font-weight:600;margin:20px 0 16px;">Setup Steps</p>
+<div style="background:#152238;border-radius:12px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;"><div style="width:32px;height:32px;background:#1e3a5f;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#00d4aa;font-weight:bold;">1</div><p>Go to Fiverr/Upwork Settings</p></div>
+<div style="background:#152238;border-radius:12px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;"><div style="width:32px;height:32px;background:#1e3a5f;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#00d4aa;font-weight:bold;">2</div><p>Add "US Bank Account"</p></div>
+<div style="background:#152238;border-radius:12px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;"><div style="width:32px;height:32px;background:#1e3a5f;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#00d4aa;font-weight:bold;">3</div><p>Paste details & withdraw</p></div>
+</div>
+<div class="bnav"><div class="nitem" onclick="go('s-home')"><span class="nicon">🏠</span><span class="nlabel">Home</span></div><div class="nitem" onclick="go('s-card')"><span class="nicon">💳</span><span class="nlabel">Card</span></div><div class="nitem" onclick="go('s-activity')"><span class="nicon">📊</span><span class="nlabel">Activity</span></div><div class="nitem" onclick="go('s-profile')"><span class="nicon">👤</span><span class="nlabel">Profile</span></div></div>
+</div>
+
+<!-- Receive Users -->
+<div class="screen" id="s-rcvusers">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-home')">←</span><span class="htitle">Receive Money</span></div>
+<div class="scroll">
+<div class="tabs"><div class="tab" onclick="go('s-rcvplat')">From Platforms</div><div class="tab active">From Users</div></div>
+<div class="qrbox"><div style="width:140px;height:140px;background:repeating-conic-gradient(#333 0% 25%,#fff 0% 50%) 50%/20px 20px;margin:0 auto 16px;border-radius:8px;"></div><p style="color:#333;font-weight:bold;font-size:18px;">Rahim Ahmed</p><p style="color:#666;font-size:14px;">@rahim_ahmed</p></div>
+<div class="copyrow"><div><p style="font-size:12px;color:#8899aa;">Payment Link</p><p>stablepay.io/pay/@rahim</p></div><span class="copybtn">Copy</span></div>
+<button class="btn" onclick="go('s-reqamt')" style="margin-top:20px;">Request Specific Amount</button>
+<div style="display:flex;gap:12px;margin-top:16px;"><button class="btn2" style="flex:1;margin-top:0;">Share QR</button><button class="btn2" style="flex:1;margin-top:0;">Share Link</button></div>
+</div>
+<div class="bnav"><div class="nitem" onclick="go('s-home')"><span class="nicon">🏠</span><span class="nlabel">Home</span></div><div class="nitem" onclick="go('s-card')"><span class="nicon">💳</span><span class="nlabel">Card</span></div><div class="nitem" onclick="go('s-activity')"><span class="nicon">📊</span><span class="nlabel">Activity</span></div><div class="nitem" onclick="go('s-profile')"><span class="nicon">👤</span><span class="nlabel">Profile</span></div></div>
+</div>
+
+<!-- Request Amount -->
+<div class="screen" id="s-reqamt">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-rcvusers')">←</span><span class="htitle">Request Payment</span></div>
+<div class="scroll">
+<p style="color:#8899aa;font-size:14px;text-align:center;margin-bottom:8px;">Amount to request</p>
+<div class="amtbox"><span class="amtval">$150</span></div>
+<div class="qamts"><div class="qamt">$50</div><div class="qamt">$100</div><div class="qamt active">$150</div><div class="qamt">$200</div></div>
+<p style="color:#8899aa;font-size:14px;margin-bottom:8px;">Note</p>
+<div style="background:#152238;border-radius:12px;padding:16px;margin-bottom:20px;"><p>Logo design project</p></div>
+<div class="sumcard"><p style="font-size:14px;color:#8899aa;margin-bottom:8px;">Link</p><p style="font-size:12px;color:#00d4aa;">stablepay.io/pay/@rahim?amount=150</p></div>
+<button class="btn">Generate & Share</button>
+</div>
+</div>
+
+<!-- USDC Deposit -->
+<div class="screen" id="s-usdc">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-addmoney')">←</span><span class="htitle">Deposit USDC</span></div>
+<div class="scroll">
+<div class="tabs"><div class="tab active">⭐ Stellar</div><div class="tab">Other</div></div>
+<div style="background:#2a1a1a;border:1px solid #ff6b6b;border-radius:12px;padding:14px;margin-bottom:20px;display:flex;align-items:center;gap:12px;"><span style="font-size:20px;">⚠️</span><div><p style="color:#ff6b6b;font-size:13px;font-weight:bold;">Only USDC on Stellar!</p><p style="color:#8899aa;font-size:11px;">Other tokens = loss</p></div></div>
+<div class="qrbox"><div style="width:140px;height:140px;background:repeating-conic-gradient(#333 0% 25%,#fff 0% 50%) 50%/20px 20px;margin:0 auto 16px;border-radius:8px;"></div><p style="color:#666;font-size:12px;">Scan to deposit</p></div>
+<div class="copyrow"><div><p style="font-size:12px;color:#8899aa;">Address</p><p style="font-size:12px;">GDQP2KPQGK...XYZ</p></div><span class="copybtn">Copy</span></div>
+<div class="copyrow"><div><p style="font-size:12px;color:#8899aa;">Memo (Required)</p><p>123456789</p></div><span class="copybtn">Copy</span></div>
+</div>
+</div>
+
+<!-- Cash Out -->
+<div class="screen" id="s-cashout">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-home')">←</span><span class="htitle">Cash Out</span></div>
+<div class="scroll">
+<div style="text-align:center;margin-bottom:20px;"><p style="color:#8899aa;font-size:14px;">Available</p><p style="font-size:32px;font-weight:bold;">$1,250.00</p></div>
+<div class="addrcp" onclick="go('s-addtype')"><span style="font-size:24px;">+</span>Add New Recipient</div>
+<p style="font-size:16px;font-weight:600;margin-bottom:12px;">Saved Recipients</p>
+<div class="rcpcard" onclick="go('s-coamt')"><div class="rcpav bkash">b</div><div style="flex:1;"><p style="font-size:16px;font-weight:600;">My bKash</p><p style="font-size:13px;color:#8899aa;">01712-345-678</p></div><span style="background:#1e3a5f;color:#00d4aa;padding:4px 10px;border-radius:10px;font-size:10px;">Wallet</span></div>
+<div class="rcpcard" onclick="go('s-coamt')"><div class="rcpav nagad">N</div><div style="flex:1;"><p style="font-size:16px;font-weight:600;">My Nagad</p><p style="font-size:13px;color:#8899aa;">01812-456-789</p></div><span style="background:#1e3a5f;color:#00d4aa;padding:4px 10px;border-radius:10px;font-size:10px;">Wallet</span></div>
+<div class="rcpcard" onclick="go('s-coamt')"><div class="rcpav bank">🏦</div><div style="flex:1;"><p style="font-size:16px;font-weight:600;">Dutch Bangla Bank</p><p style="font-size:13px;color:#8899aa;">AC: ****4567</p></div><span style="background:#1e3a5f;color:#00d4aa;padding:4px 10px;border-radius:10px;font-size:10px;">Bank</span></div>
+</div>
+<div class="bnav"><div class="nitem" onclick="go('s-home')"><span class="nicon">🏠</span><span class="nlabel">Home</span></div><div class="nitem" onclick="go('s-card')"><span class="nicon">💳</span><span class="nlabel">Card</span></div><div class="nitem" onclick="go('s-activity')"><span class="nicon">📊</span><span class="nlabel">Activity</span></div><div class="nitem" onclick="go('s-profile')"><span class="nicon">👤</span><span class="nlabel">Profile</span></div></div>
+</div>
+
+<!-- Add Recipient Type -->
+<div class="screen" id="s-addtype">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-cashout')">←</span><span class="htitle">Add Recipient</span></div>
+<div class="scroll">
+<p style="font-size:24px;font-weight:bold;margin-bottom:8px;">Choose type</p>
+<p style="color:#8899aa;font-size:14px;margin-bottom:24px;">Where to send?</p>
+<div class="typecard sel" onclick="go('s-addwallet')"><div style="display:flex;align-items:center;gap:16px;"><div style="width:60px;height:60px;background:rgba(0,212,170,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;">📱</div><div style="flex:1;"><p style="font-size:18px;font-weight:bold;">Mobile Wallet</p><p style="font-size:13px;color:#8899aa;">bKash, Nagad, Rocket</p><p style="font-size:12px;color:#00d4aa;margin-top:8px;">⚡ Instant</p></div><div style="width:24px;height:24px;background:#00d4aa;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#0a1628;">✓</div></div></div>
+<div class="typecard" onclick="go('s-addbank')"><div style="display:flex;align-items:center;gap:16px;"><div style="width:60px;height:60px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;">🏦</div><div style="flex:1;"><p style="font-size:18px;font-weight:bold;">Bank Account</p><p style="font-size:13px;color:#8899aa;">Any BD bank</p><p style="font-size:12px;color:#8899aa;margin-top:8px;">🕐 1-2 days</p></div><div style="width:24px;height:24px;border:2px solid #2a4a6a;border-radius:50%;"></div></div></div>
+</div>
+</div>
+
+<!-- Add Wallet -->
+<div class="screen" id="s-addwallet">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-addtype')">←</span><span class="htitle">Wallet Details</span></div>
+<div class="scroll">
+<p style="color:#8899aa;font-size:14px;margin-bottom:12px;">Provider</p>
+<div style="display:flex;gap:10px;margin-bottom:24px;"><div style="flex:1;background:#152238;border:2px solid #00d4aa;border-radius:12px;padding:16px;text-align:center;"><div style="width:36px;height:36px;background:#e2136e;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;">b</div><p style="font-size:11px;color:#00d4aa;">bKash</p></div><div style="flex:1;background:#152238;border:1px solid #2a4a6a;border-radius:12px;padding:16px;text-align:center;"><div style="width:36px;height:36px;background:#f26522;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;">N</div><p style="font-size:11px;color:#8899aa;">Nagad</p></div><div style="flex:1;background:#152238;border:1px solid #2a4a6a;border-radius:12px;padding:16px;text-align:center;"><div style="width:36px;height:36px;background:#8b2e8b;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;">R</div><p style="font-size:11px;color:#8899aa;">Rocket</p></div></div>
+<p style="color:#8899aa;font-size:14px;margin-bottom:8px;">Name</p>
+<div style="background:#152238;border:1px solid #2a4a6a;border-radius:12px;padding:16px;margin-bottom:16px;"><p>Rahim Ahmed</p></div>
+<p style="color:#8899aa;font-size:14px;margin-bottom:8px;">Phone</p>
+<div style="background:#152238;border:2px solid #00d4aa;border-radius:12px;padding:16px;margin-bottom:24px;"><p>01712-345-678</p></div>
+<button class="btn" onclick="go('s-cashout')">Save Recipient</button>
+</div>
+</div>
+
+<!-- Add Bank -->
+<div class="screen" id="s-addbank">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-addtype')">←</span><span class="htitle">Bank Details</span></div>
+<div class="scroll">
+<p style="color:#8899aa;font-size:14px;margin-bottom:8px;">Bank</p>
+<div style="background:#152238;border:2px solid #00d4aa;border-radius:12px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;"><div style="width:36px;height:36px;background:#1a5f7a;border-radius:50%;display:flex;align-items:center;justify-content:center;">🏦</div><p style="flex:1;">Dutch Bangla Bank</p><span style="color:#8899aa;">▼</span></div>
+<p style="color:#8899aa;font-size:14px;margin-bottom:8px;">Account Holder</p>
+<div style="background:#152238;border:1px solid #2a4a6a;border-radius:12px;padding:16px;margin-bottom:16px;"><p>RAHIM AHMED</p></div>
+<p style="color:#8899aa;font-size:14px;margin-bottom:8px;">Account Number</p>
+<div style="background:#152238;border:2px solid #00d4aa;border-radius:12px;padding:16px;margin-bottom:16px;"><p>1234567890123</p></div>
+<button class="btn" onclick="go('s-cashout')">Save Recipient</button>
+</div>
+</div>
+
+<!-- Cash Out Amount -->
+<div class="screen" id="s-coamt">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-cashout')">←</span><span class="htitle">Cash Out</span></div>
+<div class="scroll">
+<div style="background:#152238;border-radius:12px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;"><div style="display:flex;align-items:center;gap:8px;flex:1;"><div style="width:32px;height:32px;background:#e2136e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;">b</div><div><p style="font-size:14px;font-weight:600;">My bKash</p><p style="font-size:12px;color:#8899aa;">01712-345-678</p></div></div><span style="color:#00d4aa;font-size:14px;cursor:pointer;" onclick="go('s-cashout')">Change</span></div>
+<p style="color:#8899aa;font-size:14px;margin-bottom:8px;">Amount (USD)</p>
+<div class="amtbox"><span class="amtval">$100</span></div>
+<div class="qamts"><div class="qamt">$50</div><div class="qamt active">$100</div><div class="qamt">$200</div><div class="qamt">$500</div></div>
+<div class="sumcard"><div class="sumrow"><span class="lbl">You send</span><span>$100.00</span></div><div class="sumrow"><span class="lbl">Fee</span><span style="color:#ff6b6b;">-$0.50</span></div><div class="sumrow"><span class="lbl">Rate</span><span>1 USD = ৳109.50</span></div><div class="sumrow total"><span class="lbl">They receive</span><span class="val">৳10,897</span></div></div>
+<div class="instbadge"><span>⚡</span><span>Arrives instantly</span></div>
+<button class="btn" onclick="go('s-success')">Continue</button>
+</div>
+</div>
+
+<!-- Success -->
+<div class="screen" id="s-success">
+<div class="status">9:41</div>
+<div class="succicon">✓</div>
+<h2 class="succtitle">Success!</h2>
+<p style="font-size:14px;color:#8899aa;text-align:center;margin-bottom:20px;">Money on its way</p>
+<p class="succamt">৳10,897</p>
+<div class="sumcard"><div class="sumrow"><span class="lbl">To</span><span>01712-345-678</span></div><div class="sumrow"><span class="lbl">Amount</span><span>$100.00</span></div><div class="sumrow"><span class="lbl">Fee</span><span>$0.50</span></div><div class="sumrow"><span class="lbl">TX ID</span><span style="color:#00d4aa;">TXN-ABC123</span></div></div>
+<button class="btn2">Share Receipt</button>
+<button class="btn" onclick="go('s-home')" style="margin-top:12px;">Done</button>
+</div>
+
+<!-- Send -->
+<div class="screen" id="s-send">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-home')">←</span><span class="htitle">Send Money</span></div>
+<div class="scroll">
+<p style="color:#8899aa;font-size:14px;margin-bottom:8px;">To</p>
+<div style="background:#152238;border:2px solid #00d4aa;border-radius:12px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;"><span style="font-size:18px;">🔍</span><span>+880 1812-456-789</span></div>
+<div style="background:#152238;border-radius:12px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;"><div style="width:40px;height:40px;background:#1e3a5f;border-radius:50%;display:flex;align-items:center;justify-content:center;">KR</div><div style="flex:1;"><p style="font-size:16px;font-weight:600;">Karim Rahman</p><p style="font-size:12px;color:#8899aa;">StablePay User</p></div><div style="width:24px;height:24px;background:#00d4aa;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#0a1628;">✓</div></div>
+<p style="color:#8899aa;font-size:14px;margin-bottom:8px;">Amount</p>
+<div class="amtbox"><span class="amtval">$50</span></div>
+<div class="qamts"><div class="qamt">$10</div><div class="qamt">$25</div><div class="qamt active">$50</div><div class="qamt">$100</div></div>
+<div class="sumcard"><div class="sumrow"><span class="lbl">They receive</span><span>$50.00</span></div><div class="sumrow"><span class="lbl">Fee</span><span style="color:#00d4aa;">FREE</span></div></div>
+<div class="instbadge"><span>⚡</span><span>Instant via Stellar</span></div>
+<button class="btn" onclick="go('s-success')">Send $50</button>
+</div>
+</div>
+
+<!-- Card Top-up -->
+<div class="screen" id="s-topup">
+<div class="status">9:41</div>
+<div class="header"><span class="back" onclick="go('s-addmoney')">←</span><span class="htitle">Card Top-up</span></div>
+<div class="scroll">
+<p style="color:#8899aa;font-size:14px;text-align:center;margin-bottom:8px;">Amount</p>
+<div class="amtbox"><span class="amtval">$100</span></div>
+<div class="qamts"><div class="qamt">$25</div><div class="qamt">$50</div><div class="qamt active">$100</div><div class="qamt">$200</div></div>
+<p style="color:#8899aa;font-size:14px;margin-bottom:8px;">Pay with</p>
+<div style="background:#152238;border:2px solid #00d4aa;border-radius:12px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;"><div style="background:#1a73e8;padding:8px 12px;border-radius:6px;font-size:12px;font-weight:bold;">VISA</div><div style="flex:1;"><p>•••• 4242</p><p style="font-size:12px;color:#8899aa;">09/28</p></div><div style="width:24px;height:24px;background:#00d4aa;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#0a1628;">✓</div></div>
+<div class="sumcard"><div class="sumrow"><span class="lbl">Amount</span><span>$100.00</span></div><div class="sumrow"><span class="lbl">Fee (2.5%)</span><span style="color:#ff6b6b;">$2.50</span></div><div class="sumrow total"><span class="lbl">Total</span><span class="val" style="color:#fff;">$102.50</span></div></div>
+<div style="background:#0a2a1a;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;justify-content:space-between;"><span style="color:#00d4aa;">You get</span><span style="color:#00d4aa;font-weight:bold;font-size:18px;">$100 USDC</span></div>
+<button class="btn" onclick="go('s-success')">Pay $102.50</button>
+</div>
+</div>
+
+<!-- Card (No Top-up) -->
+<div class="screen" id="s-card">
+<div class="status">9:41</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><span></span><span style="font-size:20px;font-weight:bold;">Your Card</span><span style="font-size:20px;cursor:pointer;" onclick="go('s-profile')">⚙️</span></div>
+<div class="scroll">
+<div style="background:linear-gradient(135deg,#1e3a5f,#0a1628);border-radius:20px;padding:24px;margin-bottom:20px;border:1px solid #2a4a6a;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:40px;"><div style="width:45px;height:35px;background:#d4af37;border-radius:6px;"></div><span style="font-size:24px;font-weight:bold;font-style:italic;">VISA</span></div><p style="font-size:22px;letter-spacing:3px;margin-bottom:30px;">4532 •••• •••• 4242</p><div style="display:flex;justify-content:space-between;"><div><p style="font-size:10px;color:#8899aa;">HOLDER</p><p>RAHIM AHMED</p></div><div><p style="font-size:10px;color:#8899aa;">EXPIRES</p><p>09/28</p></div><div><p style="font-size:10px;color:#8899aa;">CVV</p><p>•••</p></div></div></div>
+<div style="display:flex;gap:12px;margin-bottom:20px;"><div style="flex:1;background:#152238;border-radius:12px;padding:16px;text-align:center;cursor:pointer;"><p style="font-size:20px;margin-bottom:8px;">👁️</p><p style="font-size:11px;color:#8899aa;">Show</p></div><div style="flex:1;background:#152238;border-radius:12px;padding:16px;text-align:center;cursor:pointer;"><p style="font-size:20px;margin-bottom:8px;">❄️</p><p style="font-size:11px;color:#8899aa;">Freeze</p></div><div style="flex:1;background:#152238;border-radius:12px;padding:16px;text-align:center;cursor:pointer;"><p style="font-size:20px;margin-bottom:8px;">📱</p><p style="font-size:11px;color:#8899aa;">Wallet</p></div></div>
+<div style="background:#152238;border-radius:12px;padding:16px;margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div><p style="color:#8899aa;font-size:12px;">Spends from balance</p><p style="font-size:24px;font-weight:bold;">$1,250.00</p></div><div style="width:40px;height:40px;background:#00d4aa;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;">⭐</div></div><p style="font-size:11px;color:#8899aa;">Card uses USDC balance directly. No separate top-up.</p></div>
+<div class="sechead"><span class="sectitle">Card Transactions</span><span class="seclink" onclick="go('s-activity')">All</span></div>
+<div class="txitem" onclick="go('s-activity')"><div class="txicon snt" style="background:#ff9900;">A</div><div class="txinfo"><p class="txname">Amazon</p><p class="txtime">Today</p></div><span class="txamt neg">-$45.99</span></div>
+<div class="txitem" onclick="go('s-activity')"><div class="txicon snt" style="background:#1db954;">S</div><div class="txinfo"><p class="txname">Spotify</p><p class="txtime">Dec 14</p></div><span class="txamt neg">-$9.99</span></div>
+</div>
+<div class="bnav"><div class="nitem" onclick="go('s-home')"><span class="nicon">🏠</span><span class="nlabel">Home</span></div><div class="nitem active"><span class="nicon">💳</span><span class="nlabel">Card</span></div><div class="nitem" onclick="go('s-activity')"><span class="nicon">📊</span><span class="nlabel">Activity</span></div><div class="nitem" onclick="go('s-profile')"><span class="nicon">👤</span><span class="nlabel">Profile</span></div></div>
+</div>
+
+<!-- Activity -->
+<div class="screen" id="s-activity">
+<div class="status">9:41</div>
+<p style="font-size:24px;font-weight:bold;margin-bottom:16px;">Activity</p>
+<div class="scroll">
+<div style="background:#152238;border-radius:22px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;"><span>🔍</span><span style="color:#8899aa;font-size:14px;">Search...</span></div>
+<div style="display:flex;gap:8px;margin-bottom:20px;"><div class="chip active">All</div><div class="chip">Received</div><div class="chip">Sent</div><div class="chip">Card</div></div>
+<p style="color:#8899aa;font-size:14px;margin-bottom:10px;">Today</p>
+<div class="txitem"><div class="txicon rcv">↓</div><div class="txinfo"><p class="txname">Fiverr Deposit</p><p class="txtime">2:34 PM</p></div><span class="txamt pos">+$500</span></div>
+<div class="txitem"><div class="txicon snt">💳</div><div class="txinfo"><p class="txname">Amazon</p><p class="txtime">11:20 AM</p></div><span class="txamt neg">-$45.99</span></div>
+<p style="color:#8899aa;font-size:14px;margin:16px 0 10px;">Yesterday</p>
+<div class="txitem"><div class="txicon snt">↑</div><div class="txinfo"><p class="txname">To Karim R.</p><p class="txtime">4:15 PM</p></div><span class="txamt neg">-$50</span></div>
+<div class="txitem"><div class="txicon snt">$</div><div class="txinfo"><p class="txname">bKash Cashout</p><p class="txtime">2:00 PM</p></div><span class="txamt neg">-$100</span></div>
+<div class="txitem"><div class="txicon rcv">↓</div><div class="txinfo"><p class="txname">Upwork</p><p class="txtime">10:30 AM</p></div><span class="txamt pos">+$750</span></div>
+</div>
+<div class="bnav"><div class="nitem" onclick="go('s-home')"><span class="nicon">🏠</span><span class="nlabel">Home</span></div><div class="nitem" onclick="go('s-card')"><span class="nicon">💳</span><span class="nlabel">Card</span></div><div class="nitem active"><span class="nicon">📊</span><span class="nlabel">Activity</span></div><div class="nitem" onclick="go('s-profile')"><span class="nicon">👤</span><span class="nlabel">Profile</span></div></div>
+</div>
+
+<!-- Profile -->
+<div class="screen" id="s-profile">
+<div class="status">9:41</div>
+<p style="font-size:20px;font-weight:bold;text-align:center;margin-bottom:20px;">Profile</p>
+<div class="scroll">
+<div style="background:#152238;border-radius:16px;padding:20px;margin-bottom:24px;display:flex;align-items:center;gap:16px;"><div style="width:70px;height:70px;background:#1e3a5f;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;">RA</div><div style="flex:1;"><p style="font-size:18px;font-weight:bold;">Rahim Ahmed</p><p style="font-size:13px;color:#8899aa;">+880 1712-345-678</p><div style="background:#00d4aa;display:inline-block;padding:4px 12px;border-radius:12px;margin-top:6px;"><span style="font-size:11px;color:#0a1628;font-weight:bold;">Verified ✓</span></div></div></div>
+<p style="color:#8899aa;font-size:14px;margin-bottom:10px;">Account</p>
+<div class="profitem" onclick="go('s-rcvplat')"><span style="font-size:18px;">🏦</span><span style="flex:1;">Bank Details</span><span style="color:#8899aa;">›</span></div>
+<div class="profitem" onclick="go('s-cashout')"><span style="font-size:18px;">👥</span><span style="flex:1;">Saved Recipients</span><span style="color:#8899aa;">›</span></div>
+<div class="profitem"><span style="font-size:18px;">💳</span><span style="flex:1;">Payment Methods</span><span style="color:#8899aa;">›</span></div>
+<p style="color:#8899aa;font-size:14px;margin:16px 0 10px;">Security</p>
+<div class="profitem"><span style="font-size:18px;">🔒</span><span style="flex:1;">Change PIN</span><span style="color:#8899aa;">›</span></div>
+<div class="profitem"><span style="font-size:18px;">👆</span><span style="flex:1;">Biometric Login</span><div style="width:50px;height:28px;background:#00d4aa;border-radius:14px;position:relative;"><div style="width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;right:4px;top:4px;"></div></div></div>
+<p style="color:#8899aa;font-size:14px;margin:16px 0 10px;">Support</p>
+<div class="profitem"><span style="font-size:18px;">❓</span><span style="flex:1;">Help Center</span><span style="color:#8899aa;">›</span></div>
+<p style="color:#ff6b6b;text-align:center;margin-top:24px;cursor:pointer;" onclick="go('s-welcome')">Log Out</p>
+</div>
+<div class="bnav"><div class="nitem" onclick="go('s-home')"><span class="nicon">🏠</span><span class="nlabel">Home</span></div><div class="nitem" onclick="go('s-card')"><span class="nicon">💳</span><span class="nlabel">Card</span></div><div class="nitem" onclick="go('s-activity')"><span class="nicon">📊</span><span class="nlabel">Activity</span></div><div class="nitem active"><span class="nicon">👤</span><span class="nlabel">Profile</span></div></div>
+</div>
+
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+<h3 class="flowtitle">📱 Navigation</h3>
+<div class="flowsec"><p class="flowsectitle">Main</p>
+<div class="flowitem active" onclick="go('s-welcome')"><span class="flownum">1</span><span class="flowname">Welcome</span></div>
+<div class="flowitem" onclick="go('s-home')"><span class="flownum">2</span><span class="flowname">🏠 Home</span></div>
+<div class="flowitem" onclick="go('s-card')"><span class="flownum">3</span><span class="flowname">💳 Card</span></div>
+<div class="flowitem" onclick="go('s-activity')"><span class="flownum">4</span><span class="flowname">📊 Activity</span></div>
+<div class="flowitem" onclick="go('s-profile')"><span class="flownum">5</span><span class="flowname">👤 Profile</span></div>
+</div>
+<div class="flowsec"><p class="flowsectitle">Add Money</p>
+<div class="flowitem" onclick="go('s-addmoney')"><span class="flownum">6</span><span class="flowname">Options</span></div>
+<div class="flowitem" onclick="go('s-topup')"><span class="flownum">7</span><span class="flowname">Card Top-up</span></div>
+<div class="flowitem" onclick="go('s-usdc')"><span class="flownum">8</span><span class="flowname">USDC</span></div>
+</div>
+<div class="flowsec"><p class="flowsectitle">Receive</p>
+<div class="flowitem" onclick="go('s-rcvplat')"><span class="flownum">9</span><span class="flowname">From Platforms</span></div>
+<div class="flowitem" onclick="go('s-rcvusers')"><span class="flownum">10</span><span class="flowname">From Users</span></div>
+<div class="flowitem" onclick="go('s-reqamt')"><span class="flownum">11</span><span class="flowname">Request Amt</span></div>
+</div>
+<div class="flowsec"><p class="flowsectitle">Cash Out</p>
+<div class="flowitem" onclick="go('s-cashout')"><span class="flownum">12</span><span class="flowname">Recipients</span></div>
+<div class="flowitem" onclick="go('s-addtype')"><span class="flownum">13</span><span class="flowname">Add Type</span></div>
+<div class="flowitem" onclick="go('s-addwallet')"><span class="flownum">14</span><span class="flowname">Add Wallet</span></div>
+<div class="flowitem" onclick="go('s-addbank')"><span class="flownum">15</span><span class="flowname">Add Bank</span></div>
+<div class="flowitem" onclick="go('s-coamt')"><span class="flownum">16</span><span class="flowname">Amount</span></div>
+</div>
+<div class="flowsec"><p class="flowsectitle">Other</p>
+<div class="flowitem" onclick="go('s-send')"><span class="flownum">17</span><span class="flowname">Send P2P</span></div>
+<div class="flowitem" onclick="go('s-success')"><span class="flownum">18</span><span class="flowname">✓ Success</span></div>
+</div>
+<div class="info"><p><strong>27 screens • Onboarding + KYC</strong></p><p style="margin-top:8px;">• Click sidebar to jump</p><p>• Click phone to navigate</p><p>• Use bottom tabs</p></div>
+</div>
+</div>
+<script>function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.flowitem').forEach(i=>i.classList.remove('active'));document.querySelectorAll('.flowitem').forEach(i=>{if(i.getAttribute('onclick')?.includes(id))i.classList.add('active');});}</script>
+</body>
+</html>
